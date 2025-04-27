@@ -42,9 +42,12 @@ class JsonIndexBuilder(Builder):
             tags = meta.get('tags', [])
             category = meta.get('category', '')
 
-            # Normalize tags and category
+            if isinstance(title, dict):
+                title = title.get('name') or str(title)
+            elif title is None:
+                title = ""
+
             if isinstance(tags, str):
-                # comma or semicolon separated
                 tags = [tag.strip() for tag in tags.replace(';', ',').split(',') if tag.strip()]
             elif tags is None:
                 tags = []
@@ -56,7 +59,6 @@ class JsonIndexBuilder(Builder):
             elif not isinstance(category, str):
                 category = str(category)
 
-            # 2. Fallback to Sphinx node/env
             if not title:
                 if docname in self.env.titles:
                     title = self.env.titles[docname].astext().strip()
