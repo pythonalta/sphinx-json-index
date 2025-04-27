@@ -24,8 +24,9 @@ class JsonIndexBuilder(Builder):
                 'content': text,
                 'href': href,
             })
-
-        outfname = os.path.join(self.outdir, 'searchindex.json')
+        out_static_dir = os.path.join(self.outdir, '_static')
+        os.makedirs(out_static_dir, exist_ok=True)
+        outfname = os.path.join(out_static_dir, 'searchindex.json')
         with open(outfname, 'w', encoding='utf-8') as f:
             json.dump({'docs': self.output}, f, ensure_ascii=False)
 
