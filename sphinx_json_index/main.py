@@ -2,8 +2,9 @@ import json
 import yaml
 import os
 from sphinx.builders import Builder
+from sphinx.config import Config
 
-def read_md_frontmatter(srcdir, docname):
+def read_frontmatter(srcdir, docname):
     for ext in ('.md', '.markdown'):
         fn = os.path.join(srcdir, docname + ext)
         if os.path.isfile(fn):
@@ -29,15 +30,19 @@ class JsonIndexBuilder(Builder):
 
     def init(self):
         self.output = []
+        self.config.add('jsonindex_filename', 'searchindex.json', 'html', [str])
+        self.config.add('jsonindex_add_html_suffix', True, 'html', [bool])
+
 
     def get_outdated_docs(self):
         return 'all documents'
 
     def write(self, *ignored):
         srcdir = self.env.srcdir
+        add_html_suffix = self.config.jsonindex_add_html_suffix
+
         for docname in self.env.found_docs:
-            # 1. Try YAML frontmatter in Markdown source
-            meta = read_md_frontmatter(srcdir, docname)
+            meta = read_frontmatter(srcdir, docname)
             title = meta.get('title')
             tags = meta.get('tags', [])
             category = meta.get('category', '')
@@ -67,7 +72,11 @@ class JsonIndexBuilder(Builder):
 
             doctree = self.env.get_doctree(docname)
             text = doctree.astext()
-            href = docname + (self.config.html_file_suffix or '.html')
+
+            href = docname
+            if add_html_suffix:
+                href += (self.config.html_file_suffix or '.html')
+
             self.output.append({
                 'id': docname,
                 'title': title,
@@ -79,7 +88,8 @@ class JsonIndexBuilder(Builder):
 
         out_static_dir = os.path.join(self.outdir, '_static')
         os.makedirs(out_static_dir, exist_ok=True)
-        outfname = os.path.join(out_static_dir, 'searchindex.json')
+
+        outfname = os.path.join(out_static_dir, self.config.jsonindex_filename)
         with open(outfname, 'w', encoding='utf-8') as f:
             json.dump({'docs': self.output}, f, ensure_ascii=False, indent=2)
 
