@@ -1,1 +1,1 @@
-from sphinx_json_index.main import *
+from sphinx_jsonindex.main import *
