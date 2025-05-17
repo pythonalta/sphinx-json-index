@@ -46,6 +46,7 @@ class JsonIndexBuilder(Builder):
             title = meta.get('title')
             tags = meta.get('tags', [])
             category = meta.get('category', '')
+            kind = meta.get('kind', '')
 
             if isinstance(title, dict):
                 title = title.get('name') or str(title)
@@ -84,6 +85,7 @@ class JsonIndexBuilder(Builder):
                 'href': href,
                 'tags': tags,
                 'category': category,
+                'kind': kind
             })
 
         out_static_dir = os.path.join(self.outdir, '_static')
